@@ -52,9 +52,11 @@ if [ "$status" -ne 0 ]; then
   grep -E "^(Error|Critical Warning)" "$out/$name-quartus.log" | head -n 30 >&2 || true
   exit "$status"
 fi
-# Timing is informative only: MiSTer releases routinely ship with small
-# negative slack, so it is recorded in the manifest, not enforced.
-slack=$(grep -m1 -oE "Worst-case setup slack is -?[0-9.]+" "$out/$name-quartus.log" | awk '{print $NF}' || true)
+# Timing is recorded, not enforced: MiSTer releases routinely ship with
+# negative slack in the core's own clocks. The patch only adds logic to the
+# scaler's output (HDMI) clock, so a failure there is flagged.
+slack_json=$(python3 -I "$here/setup_slack.py" "$out/$name-quartus.log")
+echo "setup slack per clock (worst corner): $slack_json"
 
 rbf="$work/output_files/$revision.rbf"
 [ -f "$rbf" ] || { echo "::error::$rbf not produced" >&2; exit 1; }
@@ -79,7 +81,7 @@ json.dump({
     "quartus_image": "$image",
     "border": $border,
     "inset": $inset,
-    "worst_setup_slack_ns": ${slack:-None},
+    **json.loads("""$slack_json"""),
     "build_date": "$(date -u +%Y-%m-%dT%H:%M:%SZ)",
     "build_seconds": $secs,
 }, open(sys.argv[1], "w"), indent=2)

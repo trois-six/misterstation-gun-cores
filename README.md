@@ -59,8 +59,8 @@ build by mistake.
 * Each build is a GitHub release tagged `<Core>-Sinden_<date>-<upstream
   commit>`, with the `.rbf` and its manifest (`<asset>.json`: core, upstream
   repository, branch and commit, build date, Quartus image and revision,
-  worst setup slack, build time, sha256, size, download URL, the run that
-  built it and the commit of this repository it was built with).
+  setup slack per clock, build time, sha256, size, download URL, the run
+  that built it and the commit of this repository it was built with).
 * The release `latest` carries `index.json`, the newest build of every core,
   at a stable URL:
   <https://github.com/trois-six/misterstation-gun-cores/releases/download/latest/index.json>
@@ -120,7 +120,11 @@ and its per-core settings.
   Quartus image or a core's entry (the "recipe") rebuilds the cores concerned.
 * [`scripts/build-core.sh`](scripts/build-core.sh) checks out the upstream
   commit, patches it, and runs `quartus_sh --flow compile <project> -c
-  <revision>` in Docker.
+  <revision>` in Docker. Timing is recorded, not enforced
+  ([`scripts/setup_slack.py`](scripts/setup_slack.py)): official MiSTer
+  cores often ship with negative slack in their own clocks; the patch only
+  adds logic to the scaler's HDMI clock, whose slack is kept separately
+  (`hdmi_setup_slack_ns`) and raises a warning in the run when negative.
 * [`.github/workflows/build.yml`](.github/workflows/build.yml) runs it all:
   * triggers: push to `main` (scripts, `cores.json`, the workflow), daily at
     04:23 UTC, and manually (`force`, `cores` inputs);
