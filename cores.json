@@ -1,0 +1,19 @@
+{
+  "quartus_image": "theypsilon/quartus-lite-c5:17.0.2.docker1",
+  "border": 20,
+  "inset": 28,
+  "cores": [
+    {"name": "NES",           "repo": "MiSTer-devel/NES_MiSTer",       "branch": "master", "project": "NES",       "revision": "NES",           "timeout": 90,  "fork": "MrLightgun/NES_MiSTer"},
+    {"name": "SNES",          "repo": "MiSTer-devel/SNES_MiSTer",      "branch": "master", "project": "SNES",      "revision": "SNES",          "timeout": 120, "fork": "MrLightgun/SNES_MiSTer"},
+    {"name": "Genesis",       "repo": "MiSTer-devel/Genesis_MiSTer",   "branch": "master", "project": "Genesis",   "revision": "Genesis",       "timeout": 120, "fork": "MrLightgun/Genesis_MiSTer"},
+    {"name": "MegaDrive",     "repo": "MiSTer-devel/MegaDrive_MiSTer", "branch": "main",   "project": "MegaDrive", "revision": "MegaDrive",     "timeout": 120, "fork": "MrLightgun/MegaDrive_MiSTer"},
+    {"name": "MegaCD",        "repo": "MiSTer-devel/MegaCD_MiSTer",    "branch": "master", "project": "MegaCD",    "revision": "MegaCD",        "timeout": 150, "fork": "MrLightgun/MegaCD_MiSTer"},
+    {"name": "SMS",           "repo": "MiSTer-devel/SMS_MiSTer",       "branch": "master", "project": "SMS",       "revision": "SMS",           "timeout": 90,  "fork": "MrLightgun/SMS_MiSTer"},
+    {"name": "Atari7800",     "repo": "MiSTer-devel/Atari7800_MiSTer", "branch": "master", "project": "Atari7800", "revision": "Atari7800",     "timeout": 120, "fork": "MrLightgun/Atari7800_MiSTer"},
+    {"name": "PSX",           "repo": "MiSTer-devel/PSX_MiSTer",       "branch": "main",   "project": "PSX",       "revision": "PSX",           "timeout": 300, "fork": "MrLightgun/PSX_MiSTer"},
+    {"name": "PSX_DualSDRAM", "repo": "MiSTer-devel/PSX_MiSTer",       "branch": "main",   "project": "PSX_DualSDRAM", "revision": "PSX_DualSDRAM", "timeout": 300, "fork": "MrLightgun/PSX_MiSTer"},
+    {"name": "Saturn",        "repo": "MiSTer-devel/Saturn_MiSTer",    "branch": "main",   "project": "Saturn",    "revision": "Saturn",        "timeout": 350, "fork": "MrLightgun/Saturn_MiSTer_Sinden"},
+    {"name": "Saturn_DS",     "repo": "MiSTer-devel/Saturn_MiSTer",    "branch": "main",   "project": "Saturn_DS", "revision": "Saturn_DS",     "timeout": 350, "fork": "MrLightgun/Saturn_MiSTer_Sinden"},
+    {"name": "InputTest",     "repo": "MiSTer-devel/InputTest_MiSTer", "branch": "main",   "project": "InputTest", "revision": "InputTest",     "timeout": 60,  "fork": null}
+  ]
+}
