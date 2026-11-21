@@ -41,9 +41,10 @@ by TEMLIB; the cores belong to their authors (see each upstream repository).
 | InputTest | [MiSTer-devel/InputTest_MiSTer](https://github.com/MiSTer-devel/InputTest_MiSTer) | main | InputTest | `InputTest-Sinden_<date>.rbf` |
 
 This is the list of cores MrLightgun's driver ships Sinden builds for. The
-list lives in [`cores.json`](cores.json); adding a core is one entry there
-(any core built on the MiSTer framework gets the border, but only cores with
-light gun support are useful).
+list lives in [`cores.json`](cores.json); adding a core is one entry there,
+with its download filter `tags` (Distribution's terms for that core). Any
+core built on the MiSTer framework gets the border, but only cores with
+light gun support are useful.
 
 ### Naming
 
@@ -84,17 +85,70 @@ build by mistake.
 }
 ```
 
-## How MiSTerStation uses them
+## Installing and updating: the Downloader database
 
-MiSTerStation draws the Sinden border in its own menus when a Sinden gun is
-plugged in (Batocera's border settings). For games, the border must come from
-the core, which is what these builds are for. The integration this repository
-is laid out for: MiSTerStation reads `index.json`, installs the cores the user
-enables into a directory of their own (for example `/media/fat/_LightGun/`),
-checks the sha256, and launches a light gun game through an MGL whose `<rbf>`
-points at the Sinden build (`_LightGun/NES-Sinden`) instead of the official
-core. Manual use works the same way: copy the
-`.rbf` to the SD card and load it from MiSTer's menu.
+The cores are installed and updated the same way as the official ones: a
+[Downloader](https://github.com/MiSTer-devel/Downloader_MiSTer) database,
+which MiSTer's `downloader`/`update_all` and MiSTerStation's updater read.
+Nothing is downloaded until the database is enabled, and the cores are
+then updated with everything else. Add this to the end of
+`/media/fat/downloader.ini`:
+
+```ini
+[misterstation_gun_cores]
+db_url = 'https://raw.githubusercontent.com/trois-six/misterstation-gun-cores/db/db.json.zip'
+```
+
+* **db_id** `misterstation_gun_cores` (the INI section must be the same;
+  it never changes).
+* **URL**: `db.json.zip` on the `db` branch of this repository (a raw
+  GitHub URL, as Distribution_MiSTer and the community databases use).
+  The workflow replaces it in one commit, so it is never missing, and
+  commits only when the content changes.
+* **Install path**: `_LightGun/<Core>-Sinden_<YYYYMMDD>.rbf`, a folder no
+  official or community database uses, shown as "LightGun" in MiSTer's
+  core menu; the official cores in `_Console/` and `_Utility/` are left
+  alone. When a core is rebuilt, the database lists the new dated file
+  and Downloader removes the previous one, as it does for the official
+  cores (`_Console/NES_<date>.rbf`). Each file carries a `tangle`
+  (`nes_sinden_core`...), so a failed download of a new build keeps the
+  previous one.
+* **Download filters**: the files carry Distribution's tags for the same
+  core (`nes`, `famicom`, `console`, `cores`, `consolecd`...) plus
+  `lightgun` and `sinden`, so a filter treats a Sinden core like the
+  official one: `filter = snes` keeps only the SNES core here too, a
+  `[misterstation_gun_cores]` section can say `filter = psx saturn`.
+* **Content**: the newest build of every core of `cores.json`, the one
+  `index.json` lists (`url` is its release asset, which the pruning always
+  keeps; `hash` is the MD5 Downloader checks, `size` the file size).
+
+```json
+{
+  "v": 1,
+  "db_id": "misterstation_gun_cores",
+  "timestamp": 1795281283,
+  "files": {
+    "_LightGun/NES-Sinden_20261121.rbf": {
+      "hash": "f72f59aa8a0e56eb0cdb280718e05b53",
+      "size": 3362128,
+      "url": "https://github.com/trois-six/misterstation-gun-cores/releases/download/NES-Sinden_20261121-cf7fe6c/NES-Sinden_20261121.rbf",
+      "tags": [1, 2, 3, 0],
+      "tangle": ["nes_sinden_core"]
+    }
+  },
+  "folders": { "_LightGun": { "tags": [3, 0] } },
+  "tag_dictionary": { "lightgun": 0, "sinden": 0, "nes": 1, "famicom": 1, "console": 2, "cores": 3, "…": 4 }
+}
+```
+
+MiSTerStation draws the Sinden border in its own menus when a Sinden gun
+is plugged in (Batocera's border settings); for games the border must come
+from the core, which is what these builds are for. With the database
+enabled, MiSTerStation launches a light gun game through an MGL whose `<rbf>`
+points at the Sinden build (`_LightGun/NES-Sinden`) instead of the
+official core. Manual use works too: copy the `.rbf` to the SD card and
+load it from MiSTer's menu. `index.json` (above) stays for tools that
+want the build details.
 
 The border only appears on the HDMI output (the scaler). Use it with
 MrLightgun's [MiSTerSindenDriver](https://github.com/MrLightgun/MiSTerSindenDriver)
@@ -144,7 +198,16 @@ and its per-core settings.
     closes the build-failure issue of every core that built; then prunes:
     the 3 newest builds of every core are kept (`KEEP` in the workflow),
     and always the one `index.json` lists; older releases and their tags
-    are deleted.
+    are deleted;
+  * `database`: on every run, rebuilt or not,
+    [`scripts/make-db.py`](scripts/make-db.py) writes the Downloader
+    database from `index.json` (each asset is downloaded to compute its
+    MD5 and check its size and sha256),
+    [`scripts/check-db.py`](scripts/check-db.py) checks it (the format,
+    the path and id rules, and Downloader's own validation code from a
+    read-only clone of Downloader_MiSTer), Downloader itself installs it
+    into a scratch directory, and the `db` branch gets a commit when the
+    content changed.
 
 Run a core locally (Docker and Python 3 needed):
 
