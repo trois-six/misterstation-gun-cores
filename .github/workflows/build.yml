@@ -1,0 +1,271 @@
+name: build
+
+# Builds the official MiSTer cores listed in cores.json with the Sinden light
+# gun border, only when the upstream sources (or this repository's recipe)
+# changed since the build listed in the `latest` release's index.json.
+on:
+  push:
+    branches: [main]
+    paths: [cores.json, "scripts/**", ".github/workflows/build.yml"]
+  schedule:
+    - cron: "23 4 * * *"
+  workflow_dispatch:
+    inputs:
+      force:
+        description: Rebuild even if nothing changed
+        type: boolean
+        default: false
+      cores:
+        description: Comma-separated core names (empty = all)
+        type: string
+        default: ""
+
+permissions:
+  contents: write
+  issues: write
+
+concurrency:
+  group: build-cores
+  cancel-in-progress: false
+
+env:
+  GH_TOKEN: ${{ github.token }}
+  GH_REPO: ${{ github.repository }}
+  RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+
+jobs:
+  detect:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    outputs:
+      matrix: ${{ steps.detect.outputs.matrix }}
+      any: ${{ steps.detect.outputs.any }}
+      image: ${{ steps.detect.outputs.image }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Fetch the current index
+        run: gh release download latest --pattern index.json --dir "$RUNNER_TEMP" || echo "no index yet"
+      - name: Detect upstream changes and check the patch
+        id: detect
+        env:
+          FORCE: ${{ inputs.force }}
+          ONLY: ${{ inputs.cores }}
+        run: |
+          args=(--index "$RUNNER_TEMP/index.json" --only "$ONLY")
+          [ "$FORCE" = true ] && args+=(--force)
+          python3 scripts/detect.py "${args[@]}" > "$RUNNER_TEMP/detect.json"
+          python3 - "$RUNNER_TEMP/detect.json" <<'PY'
+          import json, os, sys
+          d = json.load(open(sys.argv[1]))
+          with open(os.environ["GITHUB_STEP_SUMMARY"], "a") as s:
+              s.write("| core | decision |\n|---|---|\n")
+              for m in d["matrix"]:
+                  s.write(f"| {m['name']} | build: {m['reason']} |\n")
+              for m in d["skipped"]:
+                  s.write(f"| {m['name']} | skip: {m['reason']} |\n")
+              for m in d["patch_failures"]:
+                  s.write(f"| {m['name']} | **patch does not apply**: {m['error']} |\n")
+          image = json.load(open("cores.json"))["quartus_image"]
+          with open(os.environ["GITHUB_OUTPUT"], "a") as o:
+              o.write(f"matrix={json.dumps({'include': d['matrix']})}\n")
+              o.write(f"any={'true' if d['matrix'] else 'false'}\n")
+              o.write(f"image={image}\n")
+          PY
+      - name: Report cores whose patch no longer applies
+        run: |
+          python3 - "$RUNNER_TEMP/detect.json" > "$RUNNER_TEMP/patch.tsv" <<'PY'
+          import json, sys
+          d = json.load(open(sys.argv[1]))
+          for m in d["patch_failures"]:
+              print("open", m["name"], m["repo"], m["commit"], m["error"], sep="\t")
+          for m in d["matrix"]:
+              print("close", m["name"], m["repo"], m["commit"], "", sep="\t")
+          PY
+          failed=0
+          while IFS=$'\t' read -r action name repo commit error; do
+            title="Sinden patch no longer applies: $name"
+            if [ "$action" = open ]; then
+              failed=1
+              printf '%s\n' "The Sinden border patch (scripts/sinden_border.py) does not apply to \`sys/ascal.vhd\` of [$repo@${commit:0:7}](https://github.com/$repo/commit/$commit)." \
+                "" "Error: \`$error\`" "" "Run: $RUN_URL" "" \
+                "Update the anchors in scripts/sinden_border.py for the new framework version." > "$RUNNER_TEMP/body.md"
+              scripts/report-issue.sh open "$title" "$RUNNER_TEMP/body.md" patch-failure
+            else
+              scripts/report-issue.sh close "$title" "The patch applies again to $repo@${commit:0:7} ($RUN_URL)."
+            fi
+          done < "$RUNNER_TEMP/patch.tsv"
+          if [ "$failed" = 1 ]; then echo "::error::the Sinden patch does not apply to some cores (issues opened)"; exit 1; fi
+
+  image:
+    needs: detect
+    if: always() && needs.detect.outputs.any == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+      - name: Look up the cached Quartus image
+        id: cache
+        uses: actions/cache@v4
+        with:
+          path: ${{ runner.temp }}/quartus-image.tar.zst
+          key: quartus-image-${{ needs.detect.outputs.image }}
+          lookup-only: true
+      - name: Pull and archive the Quartus image
+        if: steps.cache.outputs.cache-hit != 'true'
+        env:
+          IMAGE: ${{ needs.detect.outputs.image }}
+        run: |
+          scripts/free-disk.sh
+          docker pull "$IMAGE"
+          docker save "$IMAGE" | zstd -T0 -3 -q -o "$RUNNER_TEMP/quartus-image.tar.zst"
+          ls -lh "$RUNNER_TEMP/quartus-image.tar.zst"
+          docker image rm "$IMAGE"
+
+  build:
+    needs: [detect, image]
+    if: always() && needs.detect.outputs.any == 'true'
+    name: build ${{ matrix.name }}
+    runs-on: ubuntu-latest
+    timeout-minutes: ${{ matrix.timeout }}
+    strategy:
+      fail-fast: false
+      matrix: ${{ fromJSON(needs.detect.outputs.matrix) }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Free disk space
+        run: scripts/free-disk.sh
+      - name: Restore the Quartus image
+        id: cache
+        uses: actions/cache/restore@v4
+        with:
+          path: ${{ runner.temp }}/quartus-image.tar.zst
+          key: quartus-image-${{ matrix.image }}
+      - name: Load the Quartus image
+        env:
+          IMAGE: ${{ matrix.image }}
+        run: |
+          if [ -f "$RUNNER_TEMP/quartus-image.tar.zst" ]; then
+            zstd -dc "$RUNNER_TEMP/quartus-image.tar.zst" | docker load
+            rm -f "$RUNNER_TEMP/quartus-image.tar.zst"
+          else
+            docker pull "$IMAGE"
+          fi
+          df -h / | tail -n1
+      - name: Patch and compile
+        env:
+          WORK_DIR: ${{ runner.temp }}
+          M: ${{ toJSON(matrix) }}
+        run: |
+          get() { python3 -c 'import json,os,sys; print(json.loads(os.environ["M"])[sys.argv[1]])' "$1"; }
+          scripts/build-core.sh "$(get name)" "$(get repo)" "$(get commit)" "$(get project)" \
+            "$(get revision)" "$(get image)" out "$(get border)" "$(get inset)"
+          # Complete the manifest with what the index and the releases need.
+          python3 - out/*.rbf.json <<'PY'
+          import json, os, sys
+          m = json.loads(os.environ["M"])
+          path = sys.argv[1]
+          d = json.load(open(path))
+          tag = d["asset"][:-4] + "-" + m["commit"][:7]
+          repo = os.environ["GITHUB_REPOSITORY"]
+          d.update({
+              "upstream_branch": m["branch"],
+              "source_key": m["source_key"],
+              "recipe": m["recipe"],
+              "recipe_commit": os.environ["GITHUB_SHA"],
+              "release_tag": tag,
+              "download_url": f"https://github.com/{repo}/releases/download/{tag}/{d['asset']}",
+              "run_url": os.environ["RUN_URL"],
+          })
+          json.dump(d, open(path, "w"), indent=2)
+          with open(os.environ["GITHUB_STEP_SUMMARY"], "a") as s:
+              s.write(f"**{d['asset']}** from {m['repo']}@{m['commit'][:7]} in {d['build_seconds'] // 60} min, "
+                      f"sha256 `{d['sha256']}`, worst setup slack {d['worst_setup_slack_ns']} ns\n")
+          PY
+      - name: Upload the core
+        uses: actions/upload-artifact@v4
+        with:
+          name: core-${{ matrix.name }}
+          path: |
+            out/*.rbf
+            out/*.rbf.json
+          if-no-files-found: error
+          retention-days: 7
+      - name: Upload the logs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: logs-${{ matrix.name }}
+          path: |
+            out/*.log
+            out/*.summary
+          if-no-files-found: ignore
+          retention-days: 14
+      - name: Open an issue
+        if: failure() || cancelled()
+        env:
+          NAME: ${{ matrix.name }}
+          REPO: ${{ matrix.repo }}
+          COMMIT: ${{ matrix.commit }}
+        run: |
+          {
+            echo "Building **$NAME** with the Sinden border from [$REPO@${COMMIT:0:7}](https://github.com/$REPO/commit/$COMMIT) failed (or hit the timeout)."
+            echo; echo "Run: $RUN_URL (logs in the \`logs-$NAME\` artifact)"
+            if ls out/*-quartus.log >/dev/null 2>&1; then
+              echo; echo '```'; grep -hE "^(Error|Critical Warning)" out/*-quartus.log | head -n 20; tail -n 15 out/*-quartus.log; echo '```'
+            fi
+          } > "$RUNNER_TEMP/body.md"
+          scripts/report-issue.sh open "Build failed: $NAME" "$RUNNER_TEMP/body.md" build-failure
+
+  publish:
+    needs: [detect, build]
+    if: always() && needs.detect.outputs.any == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - name: Download the built cores
+        uses: actions/download-artifact@v4
+        with:
+          pattern: core-*
+          path: cores
+      - name: Create one release per core build
+        run: |
+          shopt -s nullglob
+          manifests=(cores/*/*.rbf.json)
+          [ ${#manifests[@]} -gt 0 ] || { echo "nothing built"; exit 0; }
+          for m in "${manifests[@]}"; do
+            eval "$(python3 -c 'import json,shlex,sys; d=json.load(open(sys.argv[1])); [print(f"{k}={shlex.quote(str(v))}") for k,v in d.items()]' "$m")"
+            dir=$(dirname "$m")
+            {
+              echo "**$core** with the Sinden light gun border, built from the official core [$upstream_repo@${upstream_commit:0:7}](https://github.com/$upstream_repo/commit/$upstream_commit) ($upstream_commit_date)."
+              echo
+              echo "| | |"; echo "|---|---|"
+              echo "| asset | \`$asset\` |"
+              echo "| sha256 | \`$sha256\` |"
+              echo "| border / inset | $border / $inset px |"
+              echo "| Quartus | \`$quartus_image\`, $quartus_project / $quartus_revision, $((build_seconds / 60)) min, worst setup slack $worst_setup_slack_ns ns |"
+              echo "| run | $run_url |"
+              echo
+              echo "Corresponding source: the upstream commit above plus [the patch and build scripts of this repository]($GITHUB_SERVER_URL/$GITHUB_REPOSITORY/tree/$recipe_commit). The core keeps the licence of its upstream repository."
+            } > "$dir/notes.md"
+            if gh release view "$release_tag" >/dev/null 2>&1; then
+              gh release upload "$release_tag" "$dir/$asset" "$m" --clobber
+            else
+              gh release create "$release_tag" "$dir/$asset" "$m" --title "${asset%.rbf} (${upstream_commit:0:7})" \
+                --notes-file "$dir/notes.md" --latest=false --target "$GITHUB_SHA"
+            fi
+            scripts/report-issue.sh close "Build failed: $core" "Built in $run_url: $download_url"
+          done
+      - name: Update the latest index
+        run: |
+          shopt -s nullglob
+          manifests=(cores/*/*.rbf.json)
+          [ ${#manifests[@]} -gt 0 ] || exit 0
+          gh release download latest --pattern index.json --dir old || true
+          python3 scripts/update-index.py old/index.json index.json "$GITHUB_REPOSITORY" "${manifests[@]}"
+          if ! gh release view latest >/dev/null 2>&1; then
+            gh release create latest --title "Latest index" --latest --target "$GITHUB_SHA" --notes \
+              "index.json lists the newest build of every core (asset name, URL, sha256, upstream commit). Stable URL: $GITHUB_SERVER_URL/$GITHUB_REPOSITORY/releases/download/latest/index.json"
+          fi
+          gh release upload latest index.json --clobber
+          cat index.json
