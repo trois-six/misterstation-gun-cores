@@ -55,7 +55,7 @@ fi
 # Timing is recorded, not enforced: MiSTer releases routinely ship with
 # negative slack in the core's own clocks. The patch only adds logic to the
 # scaler's output (HDMI) clock, so a failure there is flagged.
-slack_json=$(python3 -I "$here/setup_slack.py" "$out/$name-quartus.log")
+slack_json=$(python3 -I "$here/setup_slack.py" "$work/output_files/$revision.sta.summary")
 echo "setup slack per clock (worst corner): $slack_json"
 
 rbf="$work/output_files/$revision.rbf"

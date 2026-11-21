@@ -1,8 +1,12 @@
 #!/usr/bin/env python3
-"""Extract setup slack from a Quartus flow log (quartus_sta tables).
+"""Extract setup slack from a TimeQuest summary (<revision>.sta.summary).
 
-usage: setup_slack.py QUARTUS_LOG
+usage: setup_slack.py STA_SUMMARY
 
+The summary lists, for every corner and clock, blocks like
+    Type  : Slow 1100mV 85C Model Setup 'pll_hdmi|...|divclk'
+    Slack : -0.156
+    TNS   : -1.234
 Prints JSON: {"worst_setup_slack_ns": <min over corners and clocks>,
 "setup_slack_ns": {clock: <min over corners>}, "hdmi_setup_slack_ns": <min
 over the pll_hdmi clocks>}. Emits a GitHub warning when the HDMI clock, the
@@ -13,34 +17,34 @@ import json
 import re
 import sys
 
-HEAD = re.compile(r"Worst-case setup slack is (-?[0-9.]+)")
-ROW = re.compile(r"\(\d+\):\s+(-?[0-9.]+)\s+(-?[0-9.]+)\s+(\S.*?)\s*$")
+TYPE = re.compile(r"^Type\s*:\s*.*\bSetup\s+'(?P<clock>.+)'\s*$")
+SLACK = re.compile(r"^Slack\s*:\s*(?P<v>-?[0-9.]+)")
 
 
 def main():
-    per_clock, worst, in_table, raw = {}, None, False, []
-    with open(sys.argv[1], errors="replace") as f:
-        for line in f:
-            m = HEAD.search(line)
-            if m:
-                v = float(m.group(1))
-                worst = v if worst is None else min(worst, v)
-                in_table = True
-                raw.append(line.rstrip())
-                continue
-            if in_table:
-                r = ROW.search(line)
-                if not r and "(332119)" not in line:
-                    in_table = False
-                    continue
-                raw.append(line.rstrip())
-                if r:
-                    clk, v = r.group(3), float(r.group(1))
-                    per_clock[clk] = min(per_clock.get(clk, v), v)
-    print("::group::setup slack tables", *raw, "::endgroup::", sep="\n", file=sys.stderr)
+    per_clock, clock = {}, None
+    try:
+        with open(sys.argv[1], errors="replace") as f:
+            lines = f.readlines()
+    except OSError as e:
+        print(f"::warning::no timing summary: {e}", file=sys.stderr)
+        lines = []
+    for line in lines:
+        line = line.strip()
+        m = TYPE.match(line)
+        if m:
+            clock = m.group("clock")
+            continue
+        s = SLACK.match(line)
+        if s and clock is not None:
+            v = float(s.group("v"))
+            per_clock[clock] = min(per_clock.get(clock, v), v)
+            clock = None
+        elif line.startswith("Type"):
+            clock = None
     hdmi = [v for c, v in per_clock.items() if "pll_hdmi" in c]
     out = {
-        "worst_setup_slack_ns": worst,
+        "worst_setup_slack_ns": min(per_clock.values()) if per_clock else None,
         "setup_slack_ns": dict(sorted(per_clock.items(), key=lambda kv: kv[1])),
         "hdmi_setup_slack_ns": min(hdmi) if hdmi else None,
     }
