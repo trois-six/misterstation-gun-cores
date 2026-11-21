@@ -42,7 +42,7 @@ jobs:
       any: ${{ steps.detect.outputs.any }}
       image: ${{ steps.detect.outputs.image }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - name: Fetch the current index
         run: gh release download latest --pattern index.json --dir "$RUNNER_TEMP" || echo "no index yet"
       - name: Detect upstream changes and check the patch
@@ -102,10 +102,10 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 60
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - name: Look up the cached Quartus image
         id: cache
-        uses: actions/cache@v4
+        uses: actions/cache@v6
         with:
           path: ${{ runner.temp }}/quartus-image.tar.zst
           key: quartus-image-${{ needs.detect.outputs.image }}
@@ -131,12 +131,12 @@ jobs:
       fail-fast: false
       matrix: ${{ fromJSON(needs.detect.outputs.matrix) }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - name: Free disk space
         run: scripts/free-disk.sh
       - name: Restore the Quartus image
         id: cache
-        uses: actions/cache/restore@v4
+        uses: actions/cache/restore@v6
         with:
           path: ${{ runner.temp }}/quartus-image.tar.zst
           key: quartus-image-${{ matrix.image }}
@@ -179,10 +179,10 @@ jobs:
           json.dump(d, open(path, "w"), indent=2)
           with open(os.environ["GITHUB_STEP_SUMMARY"], "a") as s:
               s.write(f"**{d['asset']}** from {m['repo']}@{m['commit'][:7]} in {d['build_seconds'] // 60} min, "
-                      f"sha256 `{d['sha256']}`, worst setup slack {d['worst_setup_slack_ns']} ns\n")
+                      f"sha256 `{d['sha256']}`, worst setup slack {d['worst_setup_slack_ns']} ns (HDMI clock {d['hdmi_setup_slack_ns']} ns)\n")
           PY
       - name: Upload the core
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: core-${{ matrix.name }}
           path: |
@@ -192,7 +192,7 @@ jobs:
           retention-days: 7
       - name: Upload the logs
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: logs-${{ matrix.name }}
           path: |
@@ -222,9 +222,9 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 30
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - name: Download the built cores
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v8
         with:
           pattern: core-*
           path: cores
@@ -243,7 +243,8 @@ jobs:
               echo "| asset | \`$asset\` |"
               echo "| sha256 | \`$sha256\` |"
               echo "| border / inset | $border / $inset px |"
-              echo "| Quartus | \`$quartus_image\`, $quartus_project / $quartus_revision, $((build_seconds / 60)) min, worst setup slack $worst_setup_slack_ns ns |"
+              echo "| Quartus | \`$quartus_image\`, $quartus_project / $quartus_revision, $((build_seconds / 60)) min |"
+              echo "| setup slack | worst $worst_setup_slack_ns ns, HDMI clock $hdmi_setup_slack_ns ns |"
               echo "| run | $run_url |"
               echo
               echo "Corresponding source: the upstream commit above plus [the patch and build scripts of this repository]($GITHUB_SERVER_URL/$GITHUB_REPOSITORY/tree/$recipe_commit). The core keeps the licence of its upstream repository."
