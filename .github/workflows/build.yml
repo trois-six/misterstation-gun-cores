@@ -251,6 +251,7 @@ jobs:
             } > "$dir/notes.md"
             if gh release view "$release_tag" >/dev/null 2>&1; then
               gh release upload "$release_tag" "$dir/$asset" "$m" --clobber
+              gh release edit "$release_tag" --notes-file "$dir/notes.md"
             else
               gh release create "$release_tag" "$dir/$asset" "$m" --title "${asset%.rbf} (${upstream_commit:0:7})" \
                 --notes-file "$dir/notes.md" --latest=false --target "$GITHUB_SHA"
