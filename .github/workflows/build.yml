@@ -271,3 +271,34 @@ jobs:
           fi
           gh release upload latest index.json --clobber
           cat index.json
+      - name: Prune old builds
+        # Keeps the KEEP newest builds of every core (and always the one the
+        # latest index lists); older releases and their tags are deleted.
+        env:
+          KEEP: "3"
+        run: |
+          gh release download latest --pattern index.json --dir idx --clobber || true
+          gh release list --limit 1000 --json tagName,createdAt > releases.json
+          python3 - releases.json idx/index.json > prune.txt <<'PY'
+          import collections, json, os, sys
+          keep = int(os.environ["KEEP"])
+          try:
+              listed = open(sys.argv[2]).read()
+          except OSError:
+              listed = ""
+          by_core = collections.defaultdict(list)
+          for r in json.load(open(sys.argv[1])):
+              tag = r["tagName"]
+              if "-Sinden_" in tag:
+                  by_core[tag.split("-Sinden_")[0]].append(r)
+          for builds in by_core.values():
+              builds.sort(key=lambda r: r["createdAt"], reverse=True)
+              for r in builds[keep:]:
+                  if r["tagName"] not in listed:
+                      print(r["tagName"])
+          PY
+          while read -r tag; do
+            [ -n "$tag" ] || continue
+            echo "deleting $tag"
+            gh release delete "$tag" --cleanup-tag --yes
+          done < prune.txt

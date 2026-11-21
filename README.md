@@ -141,7 +141,10 @@ and its per-core settings.
     are kept as artifacts; a failure opens (or comments on) an issue "Build
     failed: <core>";
   * `publish`: one release per built core, then `index.json` in `latest`;
-    closes the build-failure issue of every core that built.
+    closes the build-failure issue of every core that built; then prunes:
+    the 3 newest builds of every core are kept (`KEEP` in the workflow),
+    and always the one `index.json` lists; older releases and their tags
+    are deleted.
 
 Run a core locally (Docker and Python 3 needed):
 
