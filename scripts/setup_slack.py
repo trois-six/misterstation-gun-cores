@@ -14,11 +14,11 @@ import re
 import sys
 
 HEAD = re.compile(r"Worst-case setup slack is (-?[0-9.]+)")
-ROW = re.compile(r"Info \(332119\):\s+(-?[0-9.]+)\s+(-?[0-9.]+)\s+(\S.*?)\s*$")
+ROW = re.compile(r"\(\d+\):\s+(-?[0-9.]+)\s+(-?[0-9.]+)\s+(\S.*?)\s*$")
 
 
 def main():
-    per_clock, worst, in_table = {}, None, False
+    per_clock, worst, in_table, raw = {}, None, False, []
     with open(sys.argv[1], errors="replace") as f:
         for line in f:
             m = HEAD.search(line)
@@ -26,15 +26,18 @@ def main():
                 v = float(m.group(1))
                 worst = v if worst is None else min(worst, v)
                 in_table = True
+                raw.append(line.rstrip())
                 continue
             if in_table:
-                if "Info (332119)" not in line:
+                r = ROW.search(line)
+                if not r and "(332119)" not in line:
                     in_table = False
                     continue
-                r = ROW.search(line)
+                raw.append(line.rstrip())
                 if r:
                     clk, v = r.group(3), float(r.group(1))
                     per_clock[clk] = min(per_clock.get(clk, v), v)
+    print("::group::setup slack tables", *raw, "::endgroup::", sep="\n", file=sys.stderr)
     hdmi = [v for c, v in per_clock.items() if "pll_hdmi" in c]
     out = {
         "worst_setup_slack_ns": worst,
