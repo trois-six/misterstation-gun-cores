@@ -3,7 +3,7 @@
   "border": 20,
   "inset": 28,
   "database": {
-    "db_id": "misterstation_gun_cores",
+    "db_id": "misterstation_sinden_cores",
     "folder": "_LightGun",
     "branch": "db",
     "tags": ["lightgun", "sinden"],

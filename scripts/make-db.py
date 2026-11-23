@@ -35,7 +35,7 @@ def normalize(tag):
 
 
 def fetch(url, sha256, size):
-    req = urllib.request.Request(url, headers={"User-Agent": "misterstation-gun-cores"})
+    req = urllib.request.Request(url, headers={"User-Agent": "misterstation-sinden-cores"})
     md5, sha = hashlib.md5(), hashlib.sha256()
     n = 0
     with urllib.request.urlopen(req, timeout=120) as r:

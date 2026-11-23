@@ -1,4 +1,4 @@
-# misterstation-gun-cores
+# misterstation-sinden-cores
 
 Up-to-date [MiSTer FPGA](https://github.com/MiSTer-devel) cores that draw the
 white screen border a [Sinden light gun](https://sindenlightgun.com/) needs,
@@ -64,12 +64,12 @@ build by mistake.
   that built it and the commit of this repository it was built with).
 * The release `latest` carries `index.json`, the newest build of every core,
   at a stable URL:
-  <https://github.com/trois-six/misterstation-gun-cores/releases/download/latest/index.json>
+  <https://github.com/trois-six/misterstation-sinden-cores/releases/download/latest/index.json>
 
 ```json
 {
   "format": 1,
-  "repository": "https://github.com/trois-six/misterstation-gun-cores",
+  "repository": "https://github.com/trois-six/misterstation-sinden-cores",
   "generated_at": "2026-11-21T06:00:00Z",
   "cores": {
     "NES": {
@@ -78,7 +78,7 @@ build by mistake.
       "sha256": "…",
       "upstream_repo": "MiSTer-devel/NES_MiSTer",
       "upstream_commit": "…",
-      "download_url": "https://github.com/trois-six/misterstation-gun-cores/releases/download/NES-Sinden_20261121-cf7fe6c/NES-Sinden_20261121.rbf",
+      "download_url": "https://github.com/trois-six/misterstation-sinden-cores/releases/download/NES-Sinden_20261121-cf7fe6c/NES-Sinden_20261121.rbf",
       "…": "…"
     }
   }
@@ -95,11 +95,11 @@ then updated with everything else. Add this to the end of
 `/media/fat/downloader.ini`:
 
 ```ini
-[misterstation_gun_cores]
-db_url = 'https://raw.githubusercontent.com/trois-six/misterstation-gun-cores/db/db.json.zip'
+[misterstation_sinden_cores]
+db_url = 'https://raw.githubusercontent.com/trois-six/misterstation-sinden-cores/db/db.json.zip'
 ```
 
-* **db_id** `misterstation_gun_cores` (the INI section must be the same;
+* **db_id** `misterstation_sinden_cores` (the INI section must be the same;
   it never changes).
 * **URL**: `db.json.zip` on the `db` branch of this repository (a raw
   GitHub URL, as Distribution_MiSTer and the community databases use).
@@ -117,7 +117,7 @@ db_url = 'https://raw.githubusercontent.com/trois-six/misterstation-gun-cores/db
   core (`nes`, `famicom`, `console`, `cores`, `consolecd`...) plus
   `lightgun` and `sinden`, so a filter treats a Sinden core like the
   official one: `filter = snes` keeps only the SNES core here too, a
-  `[misterstation_gun_cores]` section can say `filter = psx saturn`.
+  `[misterstation_sinden_cores]` section can say `filter = psx saturn`.
 * **Content**: the newest build of every core of `cores.json`, the one
   `index.json` lists (`url` is its release asset, which the pruning always
   keeps; `hash` is the MD5 Downloader checks, `size` the file size).
@@ -125,13 +125,13 @@ db_url = 'https://raw.githubusercontent.com/trois-six/misterstation-gun-cores/db
 ```json
 {
   "v": 1,
-  "db_id": "misterstation_gun_cores",
+  "db_id": "misterstation_sinden_cores",
   "timestamp": 1795281283,
   "files": {
     "_LightGun/NES-Sinden_20261121.rbf": {
       "hash": "f72f59aa8a0e56eb0cdb280718e05b53",
       "size": 3362128,
-      "url": "https://github.com/trois-six/misterstation-gun-cores/releases/download/NES-Sinden_20261121-cf7fe6c/NES-Sinden_20261121.rbf",
+      "url": "https://github.com/trois-six/misterstation-sinden-cores/releases/download/NES-Sinden_20261121-cf7fe6c/NES-Sinden_20261121.rbf",
       "tags": [1, 2, 3, 0],
       "tangle": ["nes_sinden_core"]
     }
