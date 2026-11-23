@@ -1,12 +1,12 @@
 {
   "v": 1,
-  "db_id": "misterstation_gun_cores",
-  "timestamp": 1795281434,
+  "db_id": "misterstation_sinden_cores",
+  "timestamp": 1795419548,
   "files": {
     "_LightGun/Atari7800-Sinden_20261121.rbf": {
       "hash": "a88f2aba05789b3b890aa815272bcb0d",
       "size": 4329872,
-      "url": "https://github.com/trois-six/misterstation-gun-cores/releases/download/Atari7800-Sinden_20261121-0dc8ad2/Atari7800-Sinden_20261121.rbf",
+      "url": "https://github.com/trois-six/misterstation-sinden-cores/releases/download/Atari7800-Sinden_20261121-0dc8ad2/Atari7800-Sinden_20261121.rbf",
       "tags": [
         9,
         2,
@@ -20,7 +20,7 @@
     "_LightGun/Genesis-Sinden_20261121.rbf": {
       "hash": "5991da4b5f2099972064aaf269ef76aa",
       "size": 3766964,
-      "url": "https://github.com/trois-six/misterstation-gun-cores/releases/download/Genesis-Sinden_20261121-adc0c42/Genesis-Sinden_20261121.rbf",
+      "url": "https://github.com/trois-six/misterstation-sinden-cores/releases/download/Genesis-Sinden_20261121-adc0c42/Genesis-Sinden_20261121.rbf",
       "tags": [
         5,
         2,
@@ -34,7 +34,7 @@
     "_LightGun/InputTest-Sinden_20261121.rbf": {
       "hash": "29675c489fb1a8299bfa20175fa22925",
       "size": 3170620,
-      "url": "https://github.com/trois-six/misterstation-gun-cores/releases/download/InputTest-Sinden_20261121-94bcd31/InputTest-Sinden_20261121.rbf",
+      "url": "https://github.com/trois-six/misterstation-sinden-cores/releases/download/InputTest-Sinden_20261121-94bcd31/InputTest-Sinden_20261121.rbf",
       "tags": [
         12,
         13,
@@ -48,7 +48,7 @@
     "_LightGun/MegaCD-Sinden_20261121.rbf": {
       "hash": "451a54def30b4d7dfaa1c1df4c47c03d",
       "size": 4193784,
-      "url": "https://github.com/trois-six/misterstation-gun-cores/releases/download/MegaCD-Sinden_20261121-a3a3da8/MegaCD-Sinden_20261121.rbf",
+      "url": "https://github.com/trois-six/misterstation-sinden-cores/releases/download/MegaCD-Sinden_20261121-a3a3da8/MegaCD-Sinden_20261121.rbf",
       "tags": [
         6,
         2,
@@ -63,7 +63,7 @@
     "_LightGun/MegaDrive-Sinden_20261121.rbf": {
       "hash": "37edb85972e5656793c925894f75f011",
       "size": 4305568,
-      "url": "https://github.com/trois-six/misterstation-gun-cores/releases/download/MegaDrive-Sinden_20261121-8f2716f/MegaDrive-Sinden_20261121.rbf",
+      "url": "https://github.com/trois-six/misterstation-sinden-cores/releases/download/MegaDrive-Sinden_20261121-8f2716f/MegaDrive-Sinden_20261121.rbf",
       "tags": [
         5,
         2,
@@ -77,7 +77,7 @@
     "_LightGun/NES-Sinden_20261121.rbf": {
       "hash": "f72f59aa8a0e56eb0cdb280718e05b53",
       "size": 3362128,
-      "url": "https://github.com/trois-six/misterstation-gun-cores/releases/download/NES-Sinden_20261121-cf7fe6c/NES-Sinden_20261121.rbf",
+      "url": "https://github.com/trois-six/misterstation-sinden-cores/releases/download/NES-Sinden_20261121-cf7fe6c/NES-Sinden_20261121.rbf",
       "tags": [
         1,
         2,
@@ -91,7 +91,7 @@
     "_LightGun/PSX-Sinden_20261121.rbf": {
       "hash": "0a1e5a5e19634311f1cd22be4182bb2f",
       "size": 4353824,
-      "url": "https://github.com/trois-six/misterstation-gun-cores/releases/download/PSX-Sinden_20261121-da3208d/PSX-Sinden_20261121.rbf",
+      "url": "https://github.com/trois-six/misterstation-sinden-cores/releases/download/PSX-Sinden_20261121-da3208d/PSX-Sinden_20261121.rbf",
       "tags": [
         10,
         2,
@@ -106,7 +106,7 @@
     "_LightGun/PSX_DualSDRAM-Sinden_20261121.rbf": {
       "hash": "f0f074157fa53d3f795c6c6806d1e932",
       "size": 4334556,
-      "url": "https://github.com/trois-six/misterstation-gun-cores/releases/download/PSX_DualSDRAM-Sinden_20261121-da3208d/PSX_DualSDRAM-Sinden_20261121.rbf",
+      "url": "https://github.com/trois-six/misterstation-sinden-cores/releases/download/PSX_DualSDRAM-Sinden_20261121-da3208d/PSX_DualSDRAM-Sinden_20261121.rbf",
       "tags": [
         10,
         2,
@@ -121,7 +121,7 @@
     "_LightGun/SMS-Sinden_20261121.rbf": {
       "hash": "ebf2e73c84b6073980b62025e5b17539",
       "size": 4138828,
-      "url": "https://github.com/trois-six/misterstation-gun-cores/releases/download/SMS-Sinden_20261121-bb77fbd/SMS-Sinden_20261121.rbf",
+      "url": "https://github.com/trois-six/misterstation-sinden-cores/releases/download/SMS-Sinden_20261121-bb77fbd/SMS-Sinden_20261121.rbf",
       "tags": [
         8,
         2,
@@ -135,7 +135,7 @@
     "_LightGun/SNES-Sinden_20261121.rbf": {
       "hash": "df58d7f76f442e37b5e0e8f4f65d3359",
       "size": 4436692,
-      "url": "https://github.com/trois-six/misterstation-gun-cores/releases/download/SNES-Sinden_20261121-3ac236a/SNES-Sinden_20261121.rbf",
+      "url": "https://github.com/trois-six/misterstation-sinden-cores/releases/download/SNES-Sinden_20261121-3ac236a/SNES-Sinden_20261121.rbf",
       "tags": [
         4,
         2,
@@ -149,7 +149,7 @@
     "_LightGun/Saturn-Sinden_20261121.rbf": {
       "hash": "e43689ac760745f2ad39b40e5aed97b5",
       "size": 4581852,
-      "url": "https://github.com/trois-six/misterstation-gun-cores/releases/download/Saturn-Sinden_20261121-964714a/Saturn-Sinden_20261121.rbf",
+      "url": "https://github.com/trois-six/misterstation-sinden-cores/releases/download/Saturn-Sinden_20261121-964714a/Saturn-Sinden_20261121.rbf",
       "tags": [
         11,
         2,
@@ -164,7 +164,7 @@
     "_LightGun/Saturn_DS-Sinden_20261121.rbf": {
       "hash": "8de072f66ecaae73d84ac0f84d8670ab",
       "size": 4588444,
-      "url": "https://github.com/trois-six/misterstation-gun-cores/releases/download/Saturn_DS-Sinden_20261121-964714a/Saturn_DS-Sinden_20261121.rbf",
+      "url": "https://github.com/trois-six/misterstation-sinden-cores/releases/download/Saturn_DS-Sinden_20261121-964714a/Saturn_DS-Sinden_20261121.rbf",
       "tags": [
         11,
         2,
