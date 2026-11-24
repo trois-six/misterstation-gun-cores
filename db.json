@@ -1,7 +1,7 @@
 {
   "v": 1,
   "db_id": "misterstation_sinden_cores",
-  "timestamp": 1795419548,
+  "timestamp": 1795534936,
   "files": {
     "_LightGun/Atari7800-Sinden_20261121.rbf": {
       "hash": "a88f2aba05789b3b890aa815272bcb0d",
@@ -60,10 +60,10 @@
         "megacd_sinden_core"
       ]
     },
-    "_LightGun/MegaDrive-Sinden_20261121.rbf": {
-      "hash": "37edb85972e5656793c925894f75f011",
-      "size": 4305568,
-      "url": "https://github.com/trois-six/misterstation-sinden-cores/releases/download/MegaDrive-Sinden_20261121-8f2716f/MegaDrive-Sinden_20261121.rbf",
+    "_LightGun/MegaDrive-Sinden_20261124.rbf": {
+      "hash": "ba17728c7d5a2a5e2e1d7812118474c9",
+      "size": 4311276,
+      "url": "https://github.com/trois-six/misterstation-sinden-cores/releases/download/MegaDrive-Sinden_20261124-1b3f21f/MegaDrive-Sinden_20261124.rbf",
       "tags": [
         5,
         2,
@@ -88,10 +88,10 @@
         "nes_sinden_core"
       ]
     },
-    "_LightGun/PSX-Sinden_20261121.rbf": {
-      "hash": "0a1e5a5e19634311f1cd22be4182bb2f",
-      "size": 4353824,
-      "url": "https://github.com/trois-six/misterstation-sinden-cores/releases/download/PSX-Sinden_20261121-da3208d/PSX-Sinden_20261121.rbf",
+    "_LightGun/PSX-Sinden_20261124.rbf": {
+      "hash": "df7ecb7afb4e211be7fc81528eb82a59",
+      "size": 4360532,
+      "url": "https://github.com/trois-six/misterstation-sinden-cores/releases/download/PSX-Sinden_20261124-4708b47/PSX-Sinden_20261124.rbf",
       "tags": [
         10,
         2,
@@ -103,10 +103,10 @@
         "psx_sinden_core"
       ]
     },
-    "_LightGun/PSX_DualSDRAM-Sinden_20261121.rbf": {
-      "hash": "f0f074157fa53d3f795c6c6806d1e932",
-      "size": 4334556,
-      "url": "https://github.com/trois-six/misterstation-sinden-cores/releases/download/PSX_DualSDRAM-Sinden_20261121-da3208d/PSX_DualSDRAM-Sinden_20261121.rbf",
+    "_LightGun/PSX_DualSDRAM-Sinden_20261124.rbf": {
+      "hash": "bdabac9ff7be5446c8380d1498f00809",
+      "size": 4355160,
+      "url": "https://github.com/trois-six/misterstation-sinden-cores/releases/download/PSX_DualSDRAM-Sinden_20261124-4708b47/PSX_DualSDRAM-Sinden_20261124.rbf",
       "tags": [
         10,
         2,
